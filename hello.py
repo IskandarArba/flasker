@@ -3,11 +3,35 @@ from flask_wtf import FlaskForm
 from flask_wtf.recaptcha import validators
 from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired
+from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 
 # Create a Flask Instance
 app = Flask(__name__)
+# Add Database
+app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///users.db"
+# Secret Key!
 app.config['SECRET_KEY'] = "my secret key"
+# Initialize the Database
+db = SQLAlchemy(app)
 
+# Create Model
+class Users(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(120), nullable=False, unique= True)
+    date_added = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Create A String
+    def __repr__(self):
+        return '<Name %r>' % self.name
+
+
+# Create a Form class
+class UserForm(FlaskForm):
+    name = StringField('Name', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired()])
+    submit = SubmitField('Submit')
 
 # Create a Form class
 class NamerForm(FlaskForm):
@@ -99,3 +123,23 @@ def name():
         flash('From Submitted Succesfully!!', 'success')
 
     return render_template('name.html', name=name, form=form)
+
+
+@app.route('/user/add', methods=['POST', 'GET'])
+def add_user():
+    name = None
+    form = UserForm()
+    if form.validate_on_submit():
+        user = Users.query.filter_by(email=form.email.data).first()
+        if user is None:
+            user = Users(name=form.name.data, email=form.email.data)
+            db.session.add(user)
+            db.session.commit()
+        name = form.name.data
+        form.name.data = ''
+        form.email.data = ''
+        flash('User Added Succesfully!!', 'success')
+    
+    our_users = Users.query.order_by(Users.date_added)
+
+    return render_template('add_user.html', form=form, name=name, our_users=our_users)
