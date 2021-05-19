@@ -17,7 +17,7 @@
             {% for our_user in our_users %}
             <tr>
                 <td>
-                    {{ our_user.id }}. <a href="{{ url_for('update', id=our_user.id) }}">{{ our_user.name }}</a> - {{ our_user.email }}
+                    {{ our_user.id }}. <a href="{{ url_for('update', id=our_user.id) }}">{{ our_user.name }}</a> - {{ our_user.email }} - {{ our_user.favourite_color }}
                 </td>  
             </tr>       
             {% endfor %}
@@ -37,6 +37,9 @@
                 {{ form.email.label(class="form-label") }}
                 {{ form.email(class="form-control") }}
                 <br>
+                {{ form.favourite_color.label(class="form-label") }}
+                {{ form.favourite_color(class="form-control") }}
+                <br>
                 {{ form.submit(class="btn btn-secondary") }}
             </form>
         </div>
@@ -46,7 +49,7 @@
             {% for our_user in our_users %}
             <tr>
                 <td>
-                    {{ our_user.id }}. <a href="{{ url_for('update', id=our_user.id) }}">{{ our_user.name }}</a> - {{ our_user.email }}
+                    {{ our_user.id }}. <a href="{{ url_for('update', id=our_user.id) }}">{{ our_user.name }}</a> - {{ our_user.email }} - {{ our_user.favourite_color }}
                 </td>  
             </tr>       
             {% endfor %}
