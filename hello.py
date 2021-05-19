@@ -1,4 +1,4 @@
-from flask import Flask, render_template, flash
+from flask import Flask, render_template, flash, request
 from flask_wtf import FlaskForm
 from flask_wtf.recaptcha import validators
 from wtforms import StringField, SubmitField
@@ -9,7 +9,10 @@ from datetime import datetime
 # Create a Flask Instance
 app = Flask(__name__)
 # Add Database
+# Old SQLite DB
 app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///users.db"
+# New MySQL DB
+# app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:123asd@localhost/our_users"
 # Secret Key!
 app.config['SECRET_KEY'] = "my secret key"
 # Initialize the Database
@@ -143,3 +146,23 @@ def add_user():
     our_users = Users.query.order_by(Users.date_added)
 
     return render_template('add_user.html', form=form, name=name, our_users=our_users)
+
+
+# Update Database Record
+@app.route('/update/<int:id>', methods=['POST', 'GET'] )
+def update(id):
+    form = UserForm()
+    name_to_update = Users.query.get_or_404(id)
+    if request.method == 'POST':
+        name_to_update.name = request.form['name']
+        name_to_update.email = request.form['email']
+        try:
+            db.session.commit()
+            flash('User Updated Succesfully!!', 'success')
+            return render_template('update.html', form=form, name_to_update=name_to_update)
+        except:
+            flash('Error!! Looks loke there was a problem.. Please try again', 'danger')
+            return render_template('update.html', form=form, name_to_update=name_to_update)
+    else:
+        return render_template('update.html', form=form, name_to_update=name_to_update)
+    
